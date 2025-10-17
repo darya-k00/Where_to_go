@@ -3,6 +3,8 @@ from places.models import Place
 from django.http import HttpResponse, HttpRequest
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+
 
 def view_index(request: HttpRequest) -> HttpResponse:
     places = Place.objects.all()
@@ -33,7 +35,18 @@ def view_index(request: HttpRequest) -> HttpResponse:
     return render(request, "index.html", {"places_geojson": places_geojson})
 
 
-def view_place(request: HttpRequest, pk: int) -> HttpResponse:
+def view_places(request: HttpRequest, pk: int) -> HttpResponse:
     place = get_object_or_404(Place, pk=pk)
 
-    return render(request, "place.html", context={"place": place})
+    serialize_data = {
+        "title": place.title,
+        "imgs": [img.image.url for img in place.images.all()],
+        "description_short": place.description_short,
+        "description_long": place.description_long,
+        "coordinates": {
+            "lng": place.lng,
+            "lat": place.lat
+        }
+    }
+
+    return JsonResponse(serialize_data, json_dumps_params={'indent': 4, 'ensure_ascii': False})

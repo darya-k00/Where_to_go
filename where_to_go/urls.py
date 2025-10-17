@@ -21,5 +21,5 @@ from places import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.view_index),
-    path('places/<int:pk>/', views.view_place),
+    path('places/<int:pk>/', views.view_places),
 ]
