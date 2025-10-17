@@ -2,6 +2,7 @@ from django.shortcuts import render
 from places.models import Place
 from django.http import HttpResponse, HttpRequest
 from django.templatetags.static import static
+from django.shortcuts import get_object_or_404
 
 def view_index(request: HttpRequest) -> HttpResponse:
     places = Place.objects.all()
@@ -29,5 +30,10 @@ def view_index(request: HttpRequest) -> HttpResponse:
         "type": "FeatureCollection",
         "features": features
     }
-    print(places_geojson)
-    return render(request, 'index.html', {'places_geojson': places_geojson})
+    return render(request, "index.html", {"places_geojson": places_geojson})
+
+
+def view_place(request: HttpRequest, pk: int) -> HttpResponse:
+    place = get_object_or_404(Place, pk=pk)
+
+    return render(request, "place.html", context={"place": place})
