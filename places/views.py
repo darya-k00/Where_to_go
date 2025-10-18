@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from places.models import Place
 from django.http import HttpResponse, HttpRequest
-from django.templatetags.static import static
+from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
@@ -20,7 +20,7 @@ def view_index(request: HttpRequest) -> HttpResponse:
                     "properties": {
                         "title": place.title,
                         "placeId": place.id,
-                        "detailsUrl": static("places/moscow_legends.json") 
+                        "detailsUrl": reverse(view_places, args=[place.id]) 
                         if place.title == "Экскурсионная компания «Легенды Москвы»"
                         else static("places/roofs24.json")
                     }

@@ -1,19 +1,33 @@
 from django.db import models
+from tinymce.models import HTMLField
+
 
 class Place(models.Model):
     title = models.CharField(verbose_name="Название", max_length=80, blank=True)
     description_short = models.TextField(verbose_name="Краткое описание", max_length=300, blank=True)
-    description_long = models.TextField(verbose_name="Описание", blank=True)
+    description_long = HTMLField(verbose_name="Описание", blank=True)
     lng = models.DecimalField(verbose_name="Долгота", max_digits=20, decimal_places=17)
-    lat = models.DecimalField(verbose_name="Шировата", max_digits=20, decimal_places=17)
+    lat = models.DecimalField(verbose_name="Широта", max_digits=20, decimal_places=17)
+
+    class Meta:
+        verbose_name = 'Место',
+        verbose_name_plural = 'Места'
+        ordering = ['title']
+
 
     def __str__(self) -> str:
         return self.title
 
 class Image(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, verbose_name="Место на карте", related_name="images")
-    image = models.ImageField(verbose_name="Картинка", upload_to="media/", blank=True)
-    number = models.PositiveIntegerField(verbose_name="Номер", default=1, db_index=True)
+    image = models.ImageField(verbose_name="Картинка", upload_to="")
+    number = models.PositiveIntegerField(verbose_name="Позиция", default=1, db_index=True)
+
+    class Meta:
+    	verbose_name = 'Картинка',
+    	verbose_name_plural = 'Фотография '
+    	ordering = ['number']
+
 
     def __str__(self):
-        return f"#{self.number} - {self.place.title}"
+        return f"{self.number} - {self.place.title}"
