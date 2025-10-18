@@ -1,12 +1,19 @@
 import requests
+import logging
+import os
 
+from django.core.exceptions import MultipleObjectsReturned
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
-from pydantic import BaseModel, ValidationError, field_validator
+from pydantic import BaseModel, ValidationError, field_validator, Field
 from typing import List
 from requests.exceptions import JSONDecodeError, HTTPError
+from decimal import Decimal
+from urllib.parse import urlparse
 
 from places.models import Image, Place
+
+logger = logging.getLogger(__name__)
 
 
 class CoordinatesSchema(BaseModel):
@@ -24,8 +31,8 @@ class CoordinatesSchema(BaseModel):
 class PlaceSchema(BaseModel):
     title: str
     imgs: List[str]
-    description_short: str
-    description_long: str
+    short_description: str = Field(alias="description_short")
+    long_description: str = Field(alias="description_long")
     coordinates: CoordinatesSchema
 
 
@@ -40,34 +47,35 @@ class Command(BaseCommand):
         try:
             response = requests.get(url)
             response.raise_for_status()
-            raw_place = response.json()
 
-            place_data = PlaceSchema(**raw_place)
+            validated_data = PlaceSchema(**response.json())
+            try:
+                place, created = Place.objects.get_or_create(
+                    title=validated_data.title,
+                    lat=Decimal(str(validated_data.coordinates.lat)),
+                    lng=Decimal(str(validated_data.coordinates.lng)),
+                    defaults={
+                        "short_description": validated_data.short_description,
+                        "long_description": validated_data.long_description,
+                    }
+                )
+            except MultipleObjectsReturned:
+                logger.error("Найдено несколько мест")
+                return
 
-            place, created = Place.objects.get_or_create(
-                title=place_data.title,
-                defaults={
-                    "description_short": place_data.description_short,
-                    "description_long": place_data.description_long,
-                    "lng": place_data.coordinates.lng,
-                    "lat": place_data.coordinates.lat,
-                }
-            )
-
-            self.update_images(place, place_data.imgs)
-
-            self.stdout.write(
+            self.update_images(place, validated_data.imgs)
+            logger.info(
                 f"Место '{place.title}' успешно {'создано' if created else 'обновлено'}"
             )
 
         except HTTPError:
-            self.stdout.write("Ошибка запроса")
+            logger.error("Ошибка запроса")
         except JSONDecodeError:
-            self.stdout.write("Ошибка на стороне сервера: невалидный json")
+            logger.error("Ошибка на стороне сервера: невалидный json")
         except ValidationError as val:
-            self.stdout.write(f"Ошибка валидации данных: {val.errors()}")
+            logger.error(f"Ошибка валидации данных: {val.errors()}")
         except Exception as e:
-            self.stdout.write(f"Ошибка: {str(e)}")
+            logger.error(f"Ошибка: {str(e)}")
 
     def update_images(self, place: Place, image_urls: List[str]) -> None:
         place.images.all().delete()
@@ -77,7 +85,7 @@ class Command(BaseCommand):
                 img_response = requests.get(url)
                 img_response.raise_for_status()
 
-                image_name = url.split("/")[-1]
+                image_name = os.path.basename(urlparse(url).path)
                 image_file = ContentFile(img_response.content, name=image_name)
 
                 Image.objects.create(
@@ -86,4 +94,4 @@ class Command(BaseCommand):
                     number=position
                 )
             except Exception as e:
-                self.stdout.write(f"Не удалось загрузить изображение {url}: {e}")
+                logger.error(f"Не удалось загрузить изображение {url}: {e}")

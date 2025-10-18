@@ -126,7 +126,8 @@
     map.addControl(sidebar);
 
     // FIXME should be hidden in production mode
-    L.control.custom({
+    {% comment %}L.control.custom({
+
       position: 'bottomleft',
       content: `
         <label>
@@ -146,7 +147,7 @@
           }
         },
       }
-    }).addTo(map);
+    }).addTo(map);{% endcomment %}
 
     function loadJSON(elementId){
       let element = document.getElementById(elementId);

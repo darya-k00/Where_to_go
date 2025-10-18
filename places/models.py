@@ -13,7 +13,7 @@ class Place(models.Model):
         verbose_name = 'Место',
         verbose_name_plural = 'Места'
         ordering = ['title']
-
+        unique_together = [('title', 'lng', 'lat')]
 
     def __str__(self) -> str:
         return self.title
