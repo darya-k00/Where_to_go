@@ -25,7 +25,7 @@ class Image(models.Model):
 
     class Meta:
     	verbose_name = 'Картинка',
-    	verbose_name_plural = 'Фотография '
+    	verbose_name_plural = 'Фотографии'
     	ordering = ['number']
 
 
