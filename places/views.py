@@ -21,8 +21,6 @@ def view_index(request: HttpRequest) -> HttpResponse:
                         "title": place.title,
                         "placeId": place.id,
                         "detailsUrl": reverse(view_places, args=[place.id]) 
-                        if place.title == "Экскурсионная компания «Легенды Москвы»"
-                        else static("places/roofs24.json")
                     }
                 }
 
