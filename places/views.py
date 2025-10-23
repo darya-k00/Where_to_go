@@ -34,7 +34,10 @@ def view_index(request: HttpRequest) -> HttpResponse:
 
 
 def view_places(request: HttpRequest, pk: int) -> HttpResponse:
-    place = get_object_or_404(Place, pk=pk)
+    place = get_object_or_404(
+      Place.objects.prefetch_related('images'),
+      id=place_id,
+    )
     images = place.images.all()
     serialize_data = {
         "title": place.title,
