@@ -23,10 +23,10 @@ class Image(models.Model):
     image = models.ImageField(verbose_name="Картинка", upload_to="")
     number = models.PositiveIntegerField(verbose_name="Позиция", default=1, db_index=True)
 
-    class Meta:
-    	verbose_name = 'Картинка',
-    	verbose_name_plural = 'Фотографии'
-    	ordering = ['number']
+  class Meta:
+      verbose_name = 'Картинка'
+   	  verbose_name_plural = 'Фотографии'
+      ordering = ['number']
 
 
     def __str__(self):
