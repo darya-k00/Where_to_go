@@ -1,6 +1,7 @@
-from pathlib import Path
-import os
 from environs import Env
+import os
+from pathlib import Path
+
 
 env = Env()
 env.read_env()
@@ -103,6 +104,7 @@ MEDIA_URL = '/media/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 
