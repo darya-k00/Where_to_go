@@ -19,8 +19,8 @@ class AdminPlace(SortableAdminMixin, admin.ModelAdmin):
     list_display = ("title", )
     fieldsets = (
         (None, {
-            "fields": ("title", "description_short",
-                       "description_long", "lng", "lat"),
+            "fields": ("title", "short_description",
+                       "long_description", "lng", "lat"),
         }),
     )
     inlines = [ImageInline]
